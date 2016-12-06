@@ -1,0 +1,24 @@
+HERE=$(pwd)
+LNX=$HERE/$1
+
+if [[ -z $1 ]];then
+   echo "usage: $0 {version de source a fournir a cscope}"
+   exit 1
+   fi
+
+if ! [[ -d $HERE/cscope/$1 ]];then
+   mkdir -p $HERE/cscope/$1
+   fi
+
+find  $LNX                                                            \
+-path "$LNX/tmp*" -prune -o                                           \
+-path "$LNX/scripts*" -prune -o                                       \
+-name "*.[chxsS]" -print > $HERE/cscope/${1}/cscope.files
+
+find  $LNX                                                            \
+-path "$LNX/tmp*" -prune -o                                           \
+-path "$LNX/scripts*" -prune -o                                       \
+-name "*.[chxsS][c]" -print >> $HERE/cscope/${1}/cscope.files
+
+cd $HERE/cscope/${1}
+cscope -b -q -k
