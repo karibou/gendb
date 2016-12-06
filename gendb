@@ -1,25 +1,36 @@
 #!/bin/bash
 HERE=$(pwd)
-LNX=$HERE/$1
 
-if [[ -z $1 ]];then
-   echo "usage: $0 {version de source a fournir a cscope}"
-   exit 1
+if [[ "$1" == "-p" ]];then
+	CSCOPE=pycscope
+	ARGS="-i $HERE/cscope/cscope.files"
+	LNX=$HERE/$2
+else
+	CSCOPE=cscope
+	ARGS=" -b -q -k"
+	LNX=$HERE/$1
+fi
+
+
+echo "Using $CSCOPE on this source code"
+
+if ! [[ -d $HERE/cscope ]];then
+   mkdir -p $HERE/cscope
    fi
 
-if ! [[ -d $HERE/cscope/$1 ]];then
-   mkdir -p $HERE/cscope/$1
-   fi
+if [[ "$CSCOPE" == "cscope" ]];then
+	find  $LNX                                                            \
+	-path "$LNX/tmp*" -prune -o                                           \
+	-path "$LNX/scripts*" -prune -o                                       \
+	-name "*.[chxsS]" -print > $HERE/cscope/cscope.files
 
-find  $LNX                                                            \
--path "$LNX/tmp*" -prune -o                                           \
--path "$LNX/scripts*" -prune -o                                       \
--name "*.[chxsS]" -print > $HERE/cscope/${1}/cscope.files
+	find  $LNX                                                            \
+	-path "$LNX/tmp*" -prune -o                                           \
+	-path "$LNX/scripts*" -prune -o                                       \
+	-name "*.[chxsS][c]" -print >> $HERE/cscope/cscope.files
+else
+	find $LNX -name "*.py" -print > $HERE/cscope/cscope.files
+fi
 
-find  $LNX                                                            \
--path "$LNX/tmp*" -prune -o                                           \
--path "$LNX/scripts*" -prune -o                                       \
--name "*.[chxsS][c]" -print >> $HERE/cscope/${1}/cscope.files
-
-cd $HERE/cscope/${1}
-cscope -b -q -k
+cd $HERE/cscope
+$CSCOPE $ARGS
